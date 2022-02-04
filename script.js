@@ -13,10 +13,6 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 let map, mapEvent;
 
-// let id = (Date.now() + '').slice(-10);
-// let dat = new Date();
-// console.log(Date.now());
-// console.log(id);
 
 class App {
     #map;
@@ -71,7 +67,42 @@ class App {
     };
 
     _newWorkout(e) {
+
+        const validInputs = (...inputs) => inputs.every(inp => Number.isFinite(inp));
+
         e.preventDefault();
+        //Get data from form 
+        const type = inputType.value;
+        const distance = +inputDistance.value;
+        const duration = +inputDuration.value;
+
+
+        //if workout running, create running object
+        if (type === 'running') {
+            const cadence = +inputCadence.value;
+            //check if data is valid
+            !validInputs(distance, duration, cadence,);
+        }
+        // if workout cycling create cycling object
+        if (type === 'cycling') {
+            const elevationGain = +inputElevation.value;
+            //check if data is valid
+            !validInputs(distance, duration, elevationGain);
+        }
+        //add new object to workout array
+
+        //render workout on map as marker
+
+        //render workout on list
+
+        //hide form
+
+        //clear input fields
+
+
+
+
+
 
         // clear input fields
         inputDistance.value = inputDuration.value = inputCadence.value = inputElevation.value = '';
@@ -96,9 +127,11 @@ class App {
 
 }
 
+const app = new App();
+
 class Workout {
     date = new Date();
-    id = (new Date() + '').slice(-10);
+    id = (Date.now() + '').slice(-10);
 
 
     constructor(coords, distance, duration) {
@@ -109,10 +142,38 @@ class Workout {
 }
 
 class Running extends Workout {
+    constructor(coords, distance, duration, cadence) {
+        super(coords, distance, duration,);
+        this.cadence = cadence;
+        this.calcPace();
+    }
 
+    calcPace() {
+        // min/km
+        this.pace = this.duration / this.distance;
+        return this.pace;
+    }
+}
+class Cycling extends Workout {
+    constructor(coords, distance, duration, elevationGain) {
+        super(coords, distance, duration,);
+        this.elevationGain = elevationGain;
+        this.calcSpeed();
+    }
+
+    calcSpeed() {
+        this.speed = this.distance / this.duration;
+        return this.speed;
+    }
 }
 
-const app = new App();
+
+
+
+const run1 = new Running([30, 15], 5.2, 24, 128);
+const cycle1 = new Cycling([30, 15], 25, 95, 528);
+console.log(run1, cycle1);
+
 
 
 
