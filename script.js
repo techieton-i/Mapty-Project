@@ -13,6 +13,7 @@ let map, mapEvent;
 
 class App {
     #map;
+    #zoomLevel = 14;
     #mapEvent;
     #workouts = [];
 
@@ -20,7 +21,11 @@ class App {
         this._getposition();
         form.addEventListener('submit', this._newWorkout.bind(this));
 
+        // get localStorage
+        this._getLocalStorage();
+
         inputType.addEventListener('change', this._toggleElevationField);
+        containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
     }
 
     _getposition() {
@@ -38,7 +43,7 @@ class App {
 
         const coords = [latitude, longitude];
 
-        this.#map = L.map('map').setView(coords, 13);
+        this.#map = L.map('map').setView(coords, this.#zoomLevel);
 
 
         console.log(this);
@@ -50,6 +55,13 @@ class App {
 
         // map events
         this.#map.on('click', this._showForm.bind(this));
+
+
+        // render workout marker fro local localStorage
+
+        this.#workouts.forEach(work =>
+            this._renderWorkoutMarker(work));
+
 
     }
 
@@ -128,6 +140,9 @@ class App {
         // display marker
         console.log(lat);
 
+        // local storage
+        this._setLocalStorage();
+
     }
 
     _renderWorkoutMarker(workout) {
@@ -140,7 +155,9 @@ class App {
                     closeOnClick: false,
                     className: `${workout.type}-popup`
                 })
-            ).setPopupContent(`${workout.type === 'running' ? ' 🏃‍♂️' : ' 🚴‍♂️'} ${workout.description}`)
+            ).setPopupContent(`${workout.type === 'running' ? ' 🏃‍♂️' : ' 🚴‍♂️'}
+            
+            ${workout.description}`)
             .openPopup();
 
     }
@@ -197,6 +214,35 @@ class App {
         form.insertAdjacentHTML('afterend', html);
     }
 
+    _moveToPopup(e) {
+        const workoutEl = e.target.closest('.workout');
+        console.log(workoutEl);
+        if (!workoutEl) return;
+        const workout = this.#workouts.find(work => work.id === workoutEl.dataset.id);
+        this.#map.setView(workout.coords, this.#zoomLevel);
+
+    }
+
+    _setLocalStorage() {
+        localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+    }
+
+    _getLocalStorage() {
+        const data = JSON.parse(localStorage.getItem('workouts'));
+        console.log(data);
+        if (!data) return;
+
+        this.#workouts = data;
+
+        this.#workouts.forEach(work =>
+            this._renderWorkout(work));
+
+    }
+
+    reset() {
+        localStorage.removeItem('workouts');
+        location.reload();
+    }
 }
 
 const app = new App();
@@ -251,6 +297,8 @@ class Cycling extends Workout {
         return this.speed;
     }
 }
+
+
 
 
 
